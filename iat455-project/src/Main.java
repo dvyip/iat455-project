@@ -52,6 +52,11 @@ public class Main {
 	BufferedImage finalImage2;
 	BufferedImage finalImage3;
 	
+	private JButton viewButton;
+	private JPanel viewButtonPanel = new JPanel();
+	private JPanel encodeView = new JPanel();
+	private JPanel decodeView = new JPanel();
+	
 	public Main() {
 		frame = new JFrame("Image Displayer");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -75,6 +80,9 @@ public class Main {
 		
 		//Temporary border to view bounds
 		Border border = BorderFactory.createLineBorder(Color.BLACK, 2);
+		Border border2 = BorderFactory.createLineBorder(Color.RED, 2);
+		previewPanel.setBorder(border2);
+		encodeView.setBorder(border2);
 		hostDisplay.setBorder(border);
 		donorDisplay.setBorder(border);
 		finalDisplay1.setBorder(border);
@@ -86,6 +94,22 @@ public class Main {
 		bitSlider.setMinorTickSpacing(1);
 		bitSlider.setPaintTicks(true);
 		bitSlider.setPaintLabels(true);
+		
+		//View Button
+		viewButton = new JButton("Decode Mode");
+		viewButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				boolean visible = encodeView.isVisible();
+				encodeView.setVisible(!visible);
+				
+				if (visible) {
+					viewButton.setText("Encode Mode");
+				} else {
+					viewButton.setText("Decode Mode");
+				}
+			}
+		});
 		
 		//Host Button
 		hostButton = new JButton("Host");
@@ -171,15 +195,25 @@ public class Main {
 		resultPanel.add(finalDisplay2);
 		resultPanel.add(finalDisplay3);
 		rightPanel.add(BorderLayout.NORTH, resultPanel);
-		
+
 		adjustmentPanel.add(bitSlider);
 		adjustmentPanel.add(generateButton);
 		
 		rightPanel.add(adjustmentPanel);
+		viewButtonPanel.add(viewButton);
 		
-		frame.add(BorderLayout.WEST, previewPanel);
-		frame.add(BorderLayout.SOUTH, buttonPanel);
-		frame.add(BorderLayout.EAST, rightPanel);
+		//Encode View
+		encodeView.setLayout(new BorderLayout());
+		encodeView.add(BorderLayout.WEST, previewPanel);
+		encodeView.add(BorderLayout.SOUTH, buttonPanel);
+		encodeView.add(BorderLayout.EAST, rightPanel);
+		
+
+		//Decode View
+		decodeView.setLayout(new BorderLayout());
+		
+		frame.add(BorderLayout.NORTH, viewButtonPanel);
+		frame.add(encodeView);
 		frame.setVisible(true);
 	}
 	
