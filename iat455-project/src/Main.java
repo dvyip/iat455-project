@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FileDialog;
@@ -8,21 +9,27 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.border.Border;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Main {
 	private int windowWidth = 1920;
 	private int windowHeight = 1000;
+	private int bitsMax = 8;
 	
+	//Encode View
 	private JFrame frame;
 	private JButton hostButton;
 	private JButton donorButton;
@@ -43,24 +50,48 @@ public class Main {
 	private JButton finalButton1;
 	private JButton finalButton2;
 	private JButton finalButton3;
-	private JSlider bitSlider = new JSlider(JSlider.HORIZONTAL, 0, 8, 0);
+	private JSlider bitSlider = new JSlider(JSlider.HORIZONTAL, 0, bitsMax, 0);
+	private JSlider bitSliderDecode = new JSlider(JSlider.HORIZONTAL, 0, bitsMax, 0);
 	
 	private JButton generateButton;
-
+	
+	//Decode View
+	private JLabel encodedDisplay = new JLabel();
+	private JLabel decodedDisplay = new JLabel();
+	private JButton encodedButton;
+	private JButton decodeButton1;
+	private JButton decodeButton2;
+	private JButton decodeButton3;
+	
+	BufferedImage hostImage;
+	BufferedImage donorImage;
+	
 	//Used to do adjustments 
 	BufferedImage finalImage1;
 	BufferedImage finalImage2;
 	BufferedImage finalImage3;
+	
+	BufferedImage encodedImage;
+	BufferedImage decodedImage;
 	
 	private JButton viewButton;
 	private JPanel viewButtonPanel = new JPanel();
 	private JPanel encodeView = new JPanel();
 	private JPanel decodeView = new JPanel();
 	
+	JPanel panelContent = new JPanel();
+	CardLayout c1 = new CardLayout();
 	public Main() {
 		frame = new JFrame("Image Displayer");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(windowWidth, windowHeight);
+		
+		panelContent.setLayout(c1);
+		
+		panelContent.add(encodeView, "1");
+		panelContent.add(decodeView, "2");
+		
+		c1.show(panelContent, "1");
 		
 		hostDisplay = new JLabel();
 		donorDisplay = new JLabel();
@@ -76,13 +107,19 @@ public class Main {
 		finalDisplay3.setPreferredSize(new Dimension(windowWidth / 5 - 10, windowHeight / 2 ));
 		rightPanel.setPreferredSize(new Dimension(windowWidth/5 * 3, windowHeight));
 		
+
+		encodedDisplay.setPreferredSize(new Dimension(windowWidth / 2 - 10, windowHeight - 150));
+		decodedDisplay.setPreferredSize(new Dimension(windowWidth / 2 - 10, windowHeight - 150));
+		
 		adjustmentPanel.setPreferredSize(new Dimension(windowWidth/5 * 3, windowHeight / 2 - 170));
 		
 		//Temporary border to view bounds
 		Border border = BorderFactory.createLineBorder(Color.BLACK, 2);
 		Border border2 = BorderFactory.createLineBorder(Color.RED, 2);
-		previewPanel.setBorder(border2);
-		encodeView.setBorder(border2);
+//		previewPanel.setBorder(border2);
+//		encodeView.setBorder(border2);
+		encodedDisplay.setBorder(border);
+		decodedDisplay.setBorder(border);
 		hostDisplay.setBorder(border);
 		donorDisplay.setBorder(border);
 		finalDisplay1.setBorder(border);
@@ -95,6 +132,11 @@ public class Main {
 		bitSlider.setPaintTicks(true);
 		bitSlider.setPaintLabels(true);
 		
+		bitSliderDecode.setMajorTickSpacing(2);
+		bitSliderDecode.setMinorTickSpacing(1);
+		bitSliderDecode.setPaintTicks(true);
+		bitSliderDecode.setPaintLabels(true);
+		
 		//View Button
 		viewButton = new JButton("Decode Mode");
 		viewButton.addActionListener(new ActionListener() {
@@ -102,6 +144,9 @@ public class Main {
 			public void actionPerformed(ActionEvent e) {
 				boolean visible = encodeView.isVisible();
 				encodeView.setVisible(!visible);
+				decodeView.setVisible(visible);
+				encodeView.setEnabled(!visible);
+				decodeView.setEnabled(visible);
 				
 				if (visible) {
 					viewButton.setText("Encode Mode");
@@ -117,7 +162,7 @@ public class Main {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					uploadHostImage(hostDisplay);
+					uploadImage(hostDisplay);
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -130,7 +175,20 @@ public class Main {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					uploadHostImage(donorDisplay);
+					uploadImage(donorDisplay);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
+		
+		//Encoded Image Button 
+		encodedButton = new JButton("Upload");
+		encodedButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					uploadImage(hostDisplay);
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -143,7 +201,7 @@ public class Main {
 		generateButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				genereateResults();
+				encodeImage();
 			}
 			
 		});
@@ -174,9 +232,33 @@ public class Main {
 			}
 		});
 		
+		decodeButton1 = new JButton("Alg 1");
+		decodeButton2 = new JButton("Alg 2");
+		decodeButton3 = new JButton("Alg 3"); 
+		
+		decodeButton1.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				decodeImage(1);
+			}
+		});
+		
+		decodeButton2.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				decodeImage(2);
+			}
+		});
+		
+		decodeButton1.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				decodeImage(3);
+			}
+		});
+		
 		hostDisplay.add(hostButton);
 		donorDisplay.add(donorButton);
-		System.out.println(hostDisplay.getWidth());
 		hostButton.setBounds((int) (hostDisplay.getPreferredSize().getWidth()/2) - 50, (int) hostDisplay.getPreferredSize().getHeight() - 20, 100, 20);
 		donorButton.setBounds((int) (donorDisplay.getPreferredSize().getWidth()/2) - 50, (int) donorDisplay.getPreferredSize().getHeight() - 20, 100, 20);
 		
@@ -205,43 +287,165 @@ public class Main {
 		//Encode View
 		encodeView.setLayout(new BorderLayout());
 		encodeView.add(BorderLayout.WEST, previewPanel);
-		encodeView.add(BorderLayout.SOUTH, buttonPanel);
 		encodeView.add(BorderLayout.EAST, rightPanel);
 		
-
 		//Decode View
 		decodeView.setLayout(new BorderLayout());
+		buttonPanel.add(bitSliderDecode);
+		buttonPanel.add(decodeButton1);
+		buttonPanel.add(decodeButton2);
+		buttonPanel.add(decodeButton3);
+		decodeView.add(BorderLayout.NORTH, buttonPanel);
 		
+		encodedDisplay.add(encodedButton);
+		encodedButton.setBounds((int) (encodedDisplay.getPreferredSize().getWidth()/2) - 50, (int) encodedDisplay.getPreferredSize().getHeight() - 20, 100, 20);
+
+		decodeView.add(BorderLayout.WEST, encodedDisplay);
+		decodeView.add(BorderLayout.EAST, decodedDisplay);
+		
+		decodeView.setEnabled(false);
+		decodeView.setVisible(false);
+		
+		
+		frame.add(panelContent);
 		frame.add(BorderLayout.NORTH, viewButtonPanel);
-		frame.add(encodeView);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frame.pack();
 		frame.setVisible(true);
 	}
 	
-	private void uploadHostImage(JLabel display) throws IOException {
+	private void uploadImage(JLabel display) throws IOException {
 		FileDialog dialog = new FileDialog(frame, "Select");
 		dialog.setMode(FileDialog.LOAD);
 		dialog.setVisible(true);
 		
 		String path = dialog.getDirectory() + dialog.getFile();
-		
 		BufferedImage image = ImageIO.read(new File(path));
+		if(display == hostDisplay) {
+			hostImage = image;
+		} else {
+			donorImage = image;
+		}
+		
+		if(!encodeView.isVisible()) {
+			encodedImage = image;
+			displayImage(image, encodedDisplay);
+		} else {
+			displayImage(image, display);
+		}
+	}
+	
+	private void downloadImage(BufferedImage image) {
+		if (image == null) {
+			System.out.println("null image");
+			return;
+		}
+		
+		String chooserTitle = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		fileChooser.showSaveDialog(null);
+		
+		try {
+			//Output file path
+			File f = new File(fileChooser.getSelectedFile().getAbsolutePath() + "\\" + chooserTitle + ".png");
 
+			System.out.println(f);
+			ImageIO.write(image, "png", f);
+			System.out.println("Writing complete.");
+		} catch (IOException e) {
+			System.out.println("Error: " + e);
+		}
+	}
+	
+	private void displayImage(BufferedImage image, JLabel display) {
 		Dimension newImageDimension = getNewDimensions(new Dimension(image.getWidth(), image.getHeight()), new Dimension(display.getWidth(), display.getHeight()));
-
 		ImageIcon imgIcon = new ImageIcon(new ImageIcon(image).getImage().getScaledInstance(newImageDimension.width, newImageDimension.height, Image.SCALE_DEFAULT));
 		display.setIcon(imgIcon);
 		frame.revalidate();
 		frame.repaint();
 	}
 	
-	private void downloadImage(BufferedImage image) {
-		//Add code here to download image
+	private void encodeImage() {
+		//Add code here to generate results
+		finalImage1 = new BufferedImage(hostImage.getWidth(), hostImage.getHeight(), hostImage.getType());
+		finalImage2 = new BufferedImage(hostImage.getWidth(), hostImage.getHeight(), hostImage.getType());
+		finalImage3 = new BufferedImage(hostImage.getWidth(), hostImage.getHeight(), hostImage.getType());
+				
+		for(int h=0; h < finalImage1.getHeight(); h++ ) {
+			for(int w=0; w < finalImage1.getWidth(); w++ ) {
+				//Algorithm 1
+				int rgb1 = hostImage.getRGB(w, h) & 0xFFF0F0F0;
+				int rgb2 = donorImage.getRGB(w, h) & 0xFFF0F0F0;
+				int bits = bitsMax - bitSlider.getValue();
+				
+				System.out.println("bits:" + bits);
+				int r2 = getRed(rgb2) >> bits;
+				int g2 = getGreen(rgb2) >> bits;
+				int b2 = getBlue(rgb2) >> bits;
+				rgb2 = new Color(r2, g2, b2).getRGB();
+				int newRGB = rgb1 | rgb2;
+				finalImage1.setRGB(w, h, newRGB);
+				
+				//Algorithm 2
+				
+				
+				
+				//Algorithm 3
+				
+				
+			}
+		}
 		
-		System.out.println("Download Image");
+		displayImage(finalImage1, finalDisplay1);
+		displayImage(finalImage2, finalDisplay2);
+		displayImage(finalImage3, finalDisplay3);
 	}
 	
-	private void genereateResults() {
-		//Add code here to generate results
+	private void decodeImage(int algorithm) {
+		decodedImage = new BufferedImage(encodedImage.getWidth(),encodedImage.getHeight(), encodedImage.getType());
+		
+		//Algorithm 1
+		for (int i = 0; i < decodedImage.getWidth(); i++) {
+			for (int j = 0; j < decodedImage.getHeight(); j++) {
+				int rgb = encodedImage.getRGB(i, j) & 0xFF0F0F0F;
+				
+				int bits = bitsMax - bitSliderDecode.getValue();
+				int r = getRed(rgb) << bits;
+				int g = getGreen(rgb) << bits;
+				int b = getBlue(rgb) << bits;
+				int newRGB = new Color(r,g,b).getRGB();
+				decodedImage.setRGB(i, j, newRGB);
+			}
+		}
+		
+		
+		//Algorithm 2
+		
+		
+		//Algorithm 3
+		
+
+		displayImage(decodedImage, decodedDisplay);
+	}
+	
+	// helper functions
+	
+	protected int getRed(int pixel) {
+		return (pixel >>> 16) & 0xFF;
+	}
+
+	protected int getGreen(int pixel) {
+		return (pixel >>> 8) & 0xFF;
+	}
+
+	protected int getBlue(int pixel) {
+		return pixel & 0xFF;
+	}
+	private int clip(int v) {
+		v = v > 255 ? 255 : v;
+		v = v < 0 ? 0 : v;
+		return v;
 	}
 	
 	// return new dimensions to fit display
