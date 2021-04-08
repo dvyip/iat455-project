@@ -379,7 +379,6 @@ public class Main {
 				//Algorithm 1
 				int rgb1 = hostImage.getRGB(w, h) & 0xFFF0F0F0;
 				int rgb2 = donorImage.getRGB(w, h) & 0xFFF0F0F0;
-				//int bits = bitsMax - bitSlider.getValue();
 				
 				System.out.println("bits:" + bits);
 				int r2 = getRed(rgb2) >> bits;
@@ -394,17 +393,13 @@ public class Main {
 				
 			}
 		}
-		//do stuff here to the first 5 pixels to encrypt the image
 
 		for(int h=0; h < finalImage2.getHeight(); h++ ) {
 			if (h == 0) {
 				for (int w = 4; w < finalImage2.getWidth(); w++) {
-					//int bits = bitsMax - bitSlider.getValue();
 					//Algorithm 2
-
 					int rgb3 = hostImage.getRGB(w, h) & 0xFFF0F0F0;
 					int rgb4 = donorImage.getRGB(w, h) & 0xFFF0F0F0;
-
 
 					System.out.println("bits:" + bits);
 					int r22 = getRed(rgb4) >> bits;
@@ -413,20 +408,12 @@ public class Main {
 					rgb4 = new Color(r22, g22, b22).getRGB();
 					int newRGB2 = rgb3 | rgb4;
 					finalImage2.setRGB(w, h, newRGB2);
-
-
-					//Algorithm 3
-
 
 				}
 			} else {
 				for (int w = 0; w < finalImage2.getWidth(); w++) {
-					//int bits = bitsMax - bitSlider.getValue();
-					//Algorithm 2
-
 					int rgb3 = hostImage.getRGB(w, h) & 0xFFF0F0F0;
 					int rgb4 = donorImage.getRGB(w, h) & 0xFFF0F0F0;
-
 
 					System.out.println("bits:" + bits);
 					int r22 = getRed(rgb4) >> bits;
@@ -434,12 +421,7 @@ public class Main {
 					int b22 = getBlue(rgb4) >> bits;
 					rgb4 = new Color(r22, g22, b22).getRGB();
 					int newRGB2 = rgb3 | rgb4;
-					//finalImage2.setRGB(finalImage1.getWidth() - 1 -  w, finalImage1.getHeight() - 1 - h, newRGB2);
 					finalImage2.setRGB(w, h, newRGB2);
-
-
-					//Algorithm 3
-
 
 				}
 			}
@@ -448,7 +430,22 @@ public class Main {
 		for(int w=0; w < 5; w++ ) {
 			finalImage2.setRGB(w, 0, rgbEncrypt);
 		}
-		
+		for(int h=0; h < finalImage3.getHeight(); h++ ) {
+			for(int w=0; w < finalImage3.getWidth(); w++ ) {
+				//Algorithm 3
+				int rgb1 = hostImage.getRGB(w, h) & 0xFFF0F0F0;
+				int rgb2 = donorImage.getRGB(w, h) & 0xFFF0F0F0;
+
+				System.out.println("bits:" + bits);
+				int r2 = getRed(rgb2) >> bits;
+				int g2 = getGreen(rgb2) >> bits;
+				int b2 = getBlue(rgb2) >> bits;
+				rgb2 = new Color(r2, g2, b2).getRGB();
+				int newRGB = rgb1 | rgb2;
+				finalImage3.setRGB(w, h, newRGB);
+			}
+		}
+
 		displayImage(finalImage1, finalDisplay1);
 		displayImage(finalImage2, finalDisplay2);
 		displayImage(finalImage3, finalDisplay3);
