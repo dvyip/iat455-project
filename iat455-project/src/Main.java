@@ -378,19 +378,18 @@ public class Main {
 			for(int w=0; w < finalImage1.getWidth(); w++ ) {
 				//Algorithm 1
 				int rgb1 = hostImage.getRGB(w, h) & 0xFFF0F0F0;
-				int rgb2 = donorImage.getRGB(w, h) & 0xFFF0F0F0;
 				
-				System.out.println("bits:" + bits);
-				int r2 = getRed(rgb2) >> bits;
-				int g2 = getGreen(rgb2) >> bits;
-				int b2 = getBlue(rgb2) >> bits;
-				rgb2 = new Color(r2, g2, b2).getRGB();
-				int newRGB = rgb1 | rgb2;
-				finalImage1.setRGB(w, h, newRGB);
-
-
-				
-				
+				if(h + 1 > donorImage.getHeight() || w + 1> donorImage.getWidth()) {
+					finalImage1.setRGB(w, h, (new Color(getRed(rgb1), getGreen(rgb1), getBlue(rgb1)).getRGB()));
+				} else {
+					int rgb2 = donorImage.getRGB(w, h) & 0xFFF0F0F0;
+					int r2 = getRed(rgb2) >> bits;
+					int g2 = getGreen(rgb2) >> bits;
+					int b2 = getBlue(rgb2) >> bits;
+					rgb2 = new Color(r2, g2, b2).getRGB();
+					int newRGB = rgb1 | rgb2;
+					finalImage1.setRGB(w, h, newRGB);
+				}
 			}
 		}
 
@@ -430,19 +429,22 @@ public class Main {
 		for(int w=0; w < 5; w++ ) {
 			finalImage2.setRGB(w, 0, rgbEncrypt);
 		}
+		
 		for(int h=0; h < finalImage3.getHeight(); h++ ) {
 			for(int w=0; w < finalImage3.getWidth(); w++ ) {
 				//Algorithm 3
 				int rgb1 = hostImage.getRGB(w, h) & 0xFFF0F0F0;
-				int rgb2 = donorImage.getRGB(w, h) & 0xFFF0F0F0;
+				
+				int dw = w >= donorImage.getWidth() ? w % donorImage.getWidth() : w;
+				int dh =  h >= donorImage.getHeight() ? h % donorImage.getHeight() : h;
+				
+				int rgb2 = donorImage.getRGB(dw, dh) & 0xFFF0F0F0;
 
-				System.out.println("bits:" + bits);
-				int r2 = getRed(rgb2) >> bits;
-				int g2 = getGreen(rgb2) >> bits;
-				int b2 = getBlue(rgb2) >> bits;
-				rgb2 = new Color(r2, g2, b2).getRGB();
-				int newRGB = rgb1 | rgb2;
-				finalImage3.setRGB(w, h, newRGB);
+				int newR = (int) (0.85 * getRed(rgb1) + 0.15 * getRed(rgb2));
+				int newG = (int) (0.85 * getGreen(rgb1) + 0.15 * getGreen(rgb2));
+				int newB = (int) (0.85 * getBlue(rgb1) + 0.15 * getBlue(rgb2));
+
+				finalImage3.setRGB(w, h, (new Color(newR, newG, newB).getRGB()));
 			}
 		}
 
