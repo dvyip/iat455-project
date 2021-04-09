@@ -398,8 +398,11 @@ public class Main {
 				for (int w = 4; w < finalImage2.getWidth(); w++) {
 					//Algorithm 2
 					int rgb3 = hostImage.getRGB(w, h) & 0xFFF0F0F0;
-					int rgb4 = donorImage.getRGB(w, h) & 0xFFF0F0F0;
 
+					if(h + 1 > donorImage.getHeight() || w + 1> donorImage.getWidth()) {
+						finalImage2.setRGB(w, h, (new Color(getRed(rgb3), getGreen(rgb3), getBlue(rgb3)).getRGB()));
+					} else {
+						int rgb4 = donorImage.getRGB(w, h) & 0xFFF0F0F0;
 					System.out.println("bits:" + bits);
 					int r22 = getRed(rgb4) >> bits;
 					int g22 = getGreen(rgb4) >> bits;
@@ -408,12 +411,15 @@ public class Main {
 					int newRGB2 = rgb3 | rgb4;
 					finalImage2.setRGB(w, h, newRGB2);
 
-				}
+				}}
 			} else {
 				for (int w = 0; w < finalImage2.getWidth(); w++) {
 					int rgb3 = hostImage.getRGB(w, h) & 0xFFF0F0F0;
-					int rgb4 = donorImage.getRGB(w, h) & 0xFFF0F0F0;
 
+					if(h + 1 > donorImage.getHeight() || w + 1> donorImage.getWidth()) {
+						finalImage2.setRGB(w, h, (new Color(getRed(rgb3), getGreen(rgb3), getBlue(rgb3)).getRGB()));
+					} else {
+						int rgb4 = donorImage.getRGB(w, h) & 0xFFF0F0F0;
 					System.out.println("bits:" + bits);
 					int r22 = getRed(rgb4) >> bits;
 					int g22 = getGreen(rgb4) >> bits;
@@ -422,7 +428,7 @@ public class Main {
 					int newRGB2 = rgb3 | rgb4;
 					finalImage2.setRGB(w, h, newRGB2);
 
-				}
+				}}
 			}
 		}
 		int rgbEncrypt = new Color(255, 255, 255).getRGB();
