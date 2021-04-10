@@ -367,6 +367,33 @@ public class Main {
 		frame.repaint();
 	}
 	
+	private int[] getHex(int bits) {
+		int hex[] = {0xFF000000, 0xFFFFFFFF};
+		
+		switch(bits) {
+		case 0:
+			return new int[] {0xFF000000, 0xFFFFFFFF, 0xFFFFFFFF};
+		case 1:
+			return new int[] {0xFF808080, 0xFFFEFEFE, 0xFF7F7F7F};
+		case 2:
+			return new int[] {0xFFC0C0C0, 0xFFFCFCFC, 0xFF7F7F7F};
+		case 3:
+			return new int[] {0xFFE0E0E0, 0xFFF8F8F8, 0xFF1F1F1F};
+		case 4:
+			return new int[] {0xFFF0F0F0, 0xFFF0F0F0, 0xFF0F0F0F};
+		case 5:
+			return new int[] {0xFFF8F8F8, 0xFFE0E0E0, 0xFF070707};
+		case 6:
+			return new int[] {0xFFFCFCFC, 0xFFC0C0C0, 0xFF030303};
+		case 7:
+			return new int[] {0xFFFEFEFE, 0xFF808080, 0xFF010101};
+		case 8:
+			return new int[] {0xFFFFFFFF, 0xFF000000, 0xFF000000};
+		default: 
+			return new int[] {0xFFF0F0F0, 0xFFF0F0F0, 0xFF0F0F0F};
+		}
+	}
+	
 	private void encodeImage() {
 		//Add code here to generate results
 		finalImage1 = new BufferedImage(hostImage.getWidth(), hostImage.getHeight(), hostImage.getType());
@@ -377,12 +404,12 @@ public class Main {
 		for(int h=0; h < finalImage1.getHeight(); h++ ) {
 			for(int w=0; w < finalImage1.getWidth(); w++ ) {
 				//Algorithm 1
-				int rgb1 = hostImage.getRGB(w, h) & 0xFFF0F0F0;
+				int rgb1 = hostImage.getRGB(w, h) & getHex(bits)[0];
 				
 				if(h + 1 > donorImage.getHeight() || w + 1> donorImage.getWidth()) {
 					finalImage1.setRGB(w, h, (new Color(getRed(rgb1), getGreen(rgb1), getBlue(rgb1)).getRGB()));
 				} else {
-					int rgb2 = donorImage.getRGB(w, h) & 0xFFF0F0F0;
+					int rgb2 = donorImage.getRGB(w, h) & getHex(bits)[1];
 					int r2 = getRed(rgb2) >> bits;
 					int g2 = getGreen(rgb2) >> bits;
 					int b2 = getBlue(rgb2) >> bits;
@@ -467,12 +494,13 @@ public class Main {
 
 		System.out.println(newRGBDecrypt);
 		if (algorithm == 1) {//Algorithm 1
-			if (newRGBDecrypt == -15790321) {
+//			if (newRGBDecrypt == -15790321) {
 				for (int i = 0; i < decodedImage.getWidth(); i++) {
 					for (int j = 0; j < decodedImage.getHeight(); j++) {
-						int rgb = encodedImage.getRGB(rand.nextInt(decodedImage.getWidth()), rand.nextInt(decodedImage.getHeight()))& 0xFF0F0F0F;
-
 						int bits = bitsMax - bitSliderDecode.getValue();
+//						int rgb = encodedImage.getRGB(rand.nextInt(decodedImage.getWidth()), rand.nextInt(decodedImage.getHeight())) & 0xFF7F7F7F;
+						int rgb = encodedImage.getRGB(i, j) & getHex(bits)[2];
+
 						int r = getRed(rgb) << bits;
 						int g = getGreen(rgb) << bits;
 						int b = getBlue(rgb) << bits;
@@ -480,20 +508,20 @@ public class Main {
 						decodedImage.setRGB(i, j, newRGB);
 					}
 				}
-			} else {
-				for (int i = 0; i < decodedImage.getWidth(); i++) {
-					for (int j = 0; j < decodedImage.getHeight(); j++) {
-						int rgb = encodedImage.getRGB(i, j) & 0xFF0F0F0F;
-
-						int bits = bitsMax - bitSliderDecode.getValue();
-						int r = getRed(rgb) << bits;
-						int g = getGreen(rgb) << bits;
-						int b = getBlue(rgb) << bits;
-						int newRGB = new Color(r, g, b).getRGB();
-						decodedImage.setRGB(i, j, newRGB);
-					}
-				}
-			}
+//			} else {
+//				for (int i = 0; i < decodedImage.getWidth(); i++) {
+//					for (int j = 0; j < decodedImage.getHeight(); j++) {
+//						int rgb = encodedImage.getRGB(i, j) & 0xFF0F0F0F;
+//
+//						int bits = bitsMax - bitSliderDecode.getValue();
+//						int r = getRed(rgb) << bits;
+//						int g = getGreen(rgb) << bits;
+//						int b = getBlue(rgb) << bits;
+//						int newRGB = new Color(r, g, b).getRGB();
+//						decodedImage.setRGB(i, j, newRGB);
+//					}
+//				}
+//			}
 		}
 
 		if (algorithm == 2) {//Algorithm 2
