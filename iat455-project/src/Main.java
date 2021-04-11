@@ -62,7 +62,6 @@ public class Main {
 	private JButton encodedButton;
 	private JButton decodeButton1;
 	private JButton decodeButton2;
-	private JButton decodeButton3;
 	
 	BufferedImage hostImage;
 	BufferedImage donorImage;
@@ -114,11 +113,9 @@ public class Main {
 		
 		adjustmentPanel.setPreferredSize(new Dimension(windowWidth/5 * 3, windowHeight / 2 - 170));
 		
-		//Temporary border to view bounds
+		//Border to view bounds
 		Border border = BorderFactory.createLineBorder(Color.BLACK, 2);
 		Border border2 = BorderFactory.createLineBorder(Color.RED, 2);
-//		previewPanel.setBorder(border2);
-//		encodeView.setBorder(border2);
 		encodedDisplay.setBorder(border);
 		decodedDisplay.setBorder(border);
 		hostDisplay.setBorder(border);
@@ -235,7 +232,6 @@ public class Main {
 		
 		decodeButton1 = new JButton("Alg 1");
 		decodeButton2 = new JButton("Alg 2");
-		decodeButton3 = new JButton("Alg 3"); 
 		
 		decodeButton1.addActionListener(new ActionListener() {
 			@Override
@@ -295,7 +291,6 @@ public class Main {
 		buttonPanel.add(bitSliderDecode);
 		buttonPanel.add(decodeButton1);
 		buttonPanel.add(decodeButton2);
-		buttonPanel.add(decodeButton3);
 		decodeView.add(BorderLayout.NORTH, buttonPanel);
 		
 		encodedDisplay.add(encodedButton);
@@ -376,7 +371,7 @@ public class Main {
 		case 1:
 			return new int[] {0xFF808080, 0xFFFEFEFE, 0xFF7F7F7F};
 		case 2:
-			return new int[] {0xFFC0C0C0, 0xFFFCFCFC, 0xFF7F7F7F};
+			return new int[] {0xFFC0C0C0, 0xFFFCFCFC, 0xFF3F3F3F};
 		case 3:
 			return new int[] {0xFFE0E0E0, 0xFFF8F8F8, 0xFF1F1F1F};
 		case 4:
